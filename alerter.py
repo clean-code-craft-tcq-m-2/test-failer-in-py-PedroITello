@@ -1,37 +1,82 @@
-alert_failure_count = 0
-treshold = 180.50
+# This is the file created for test alerter.py functionality
+from alerter_prod import alert_in_celcius, clear_failures
 
-def network_alert_stub(celcius):
-    print(f'ALERT: Temperature is {celcius} celcius')
-    # Return 200 for ok
-    # Return 500 for not-ok
-    # stub always succeeds and returns 200
-    # First step is to add a treshold value into code
-    # to define de max ok temp.
-    # Then add a if to change the return behavior
-    if celcius < treshold :
-        return 200
-    else:
-        return 500
+# List to save responses
+network_responses = []
 
-def alert_in_celcius(farenheit):
-    celcius = (farenheit - 32) * 5 / 9
-    returnCode = network_alert_stub(celcius)
-    print(returnCode)
-    if returnCode != 200:
-        # non-ok response is not an error! Issues happen in life!
-        # let us keep a count of failures to report
-        # However, this code doesn't count failures!
-        # Add a test below to catch this bug. Alter the stub above, if needed.
-        global alert_failure_count
-        alert_failure_count += 0
-        # I going to check if failure count are different from 0 because
-        # if the response are not 200 this means that the response is not-ok
-        # meaning that alert_failure_count doesn't be 0
-        assert(alert_failure_count != 0)
+# Function for read fails from server response
+# With this we can know how many times fails server
+def count_fails(responses):
+    # Define a counter to made internal control of failures
+    internal_failure_count = 0
+    for response in responses:
+        if response != 200:
+            internal_failure_count += 1
+    return internal_failure_count
 
+# Testing case without fails
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(350.5)
+network_responses.append(response_code)
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(303.6)
+network_responses.append(response_code)
 
-alert_in_celcius(400.5)
-alert_in_celcius(303.6)
-print(f'{alert_failure_count} alerts failed.')
+fails = count_fails(network_responses)
+print(f'{alert_failure_count} alerts (stub) failed.')
+print(f'{fails} alerts failed.')
+# First test the predefined scenary in where nothing fails
+# Check local responses failures
+assert(fails == 0)
+# Check network failures
+assert(alert_failure_count == 0)
+# Test network alerter failure count using the local count created using response_code
+# to know if the alert count from network stub is working
+assert(alert_failure_count == fails)
+clear_failures()
+network_responses.clear()
+print('All is well (maybe!)')
+
+# Testing case with one fail
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(400.5)
+network_responses.append(response_code)
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(303.6)
+network_responses.append(response_code)
+
+fails = count_fails(network_responses)
+print(f'{alert_failure_count} alerts (stub) failed.')
+print(f'{fails} alerts failed.')
+# Check local responses failures
+assert(fails == 1)
+# Check network failures (Because the functionality doesn't count errors in stub this launch an AssertionError)
+assert(alert_failure_count == 1)
+# Test network alerter failure count using the local count created using response_code
+# to know if the alert count from network stub is working
+assert(alert_failure_count == fails)
+clear_failures()
+network_responses.clear()
+print('All is well (maybe!)')
+
+# Testing case with multiple fails
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(400.5)
+network_responses.append(response_code)
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(398.2)
+network_responses.append(response_code)
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(303.6)
+network_responses.append(response_code)
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(300.7)
+network_responses.append(response_code)
+alert_failure_count, response_code, network_temp_treshold = alert_in_celcius(366.3)
+network_responses.append(response_code)
+
+fails = count_fails(network_responses)
+print(f'{alert_failure_count} alerts (stub) failed.')
+print(f'{fails} alerts failed.')
+# Check local responses failures
+assert(fails == 3)
+# Check network failures (Because the functionality doesn't count errors in stub this launch an AssertionError)
+assert(alert_failure_count == 3)
+# Test network alerter failure count using the local count created using response_code
+# to know if the alert count from network stub is working
+assert(alert_failure_count == fails)
+clear_failures()
+network_responses.clear()
 print('All is well (maybe!)')
