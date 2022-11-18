@@ -24,7 +24,7 @@ def get_pair_number_from_color(major_color, minor_color):
     except ValueError:
         # raise Exception('Minor index out of range')
         return False
-    return major_index * len(minor_colors) + minor_index
+    return major_index * len(minor_colors) + minor_index + 1
 
 
 result, output = print_color_map()
@@ -35,7 +35,7 @@ for index, data in enumerate(output):
     # Check the first position in where are located the '|' separator inside the list
     if index == 0:
         first_separator_position = data.find('|')
-    # Validate pair color string wellformed
+    # Validate pair color string welformed
     pair_number = get_pair_number_from_color(major_color.strip(), minor_color.strip())
     assert(pair_number == int(expected_index))
     # Check alignment on next list elements using the first_separator_position
