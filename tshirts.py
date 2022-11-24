@@ -2,7 +2,7 @@
 def size(cms):
     if cms < 38:
         return 'S'
-    elif cms > 38 and cms < 42:
+    elif cms >= 38 and cms < 42: # Add >= here to decide 38 be M size
         return 'M'
     else:
         return 'L'
